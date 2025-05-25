@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Resume Analyzer</title>
+</head>
+<body>
+<h1>Upload Resume</h1>
+<form id="resumeForm" enctype="multipart/form-data">
+    <label for="file">Resume (PDF):</label><br>
+    <input type="file" id="file" name="file" accept=".pdf" required><br><br>
+
+    <label for="jobDescription">Job Description:</label><br>
+    <textarea id="jobDescription" name="jobDescription" rows="5" cols="50" required></textarea><br><br>
+
+    <button type="submit">Upload</button>
+</form>
+
+<p id="result"></p>
+
+<script>
+    document.getElementById('resumeForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        const formData = new FormData();
+        formData.append("file", document.getElementById("file").files[0]);
+        formData.append("jobDescription", document.getElementById("jobDescription").value);
+
+        try {
+            const response = await fetch("http://localhost:8080/api/resumes/upload", {
+                method: "POST",
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error("Upload failed. Server responded with " + response.status);
+            }
+
+            const data = await response.json();
+            document.getElementById("result").innerText =
+                `Score: ${data.score}\nMatched Keywords: ${data.keywords}`;
+
+        } catch (err) {
+            document.getElementById("result").innerText = "Error: " + err.message;
+        }
+    });
+</script>
+</body>
+</html>
